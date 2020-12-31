@@ -1,5 +1,3 @@
-
-
 from .gspace import GSpace
 from .r2 import *
 

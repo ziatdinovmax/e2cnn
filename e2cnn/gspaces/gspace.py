@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import e2cnn.kernels
@@ -14,44 +13,43 @@ __all__ = ["GSpace"]
 
 
 class GSpace(ABC):
-    
-    def __init__(self, fibergroup: e2cnn.group.Group, dimensionality: int, name: str):
+    def __init__(self, fibergroup, dimensionality, name):
         r"""
         Abstract class for G-spaces.
-        
+
         A ``GSpace`` describes the space where a signal lives (e.g. :math:`\R^2` for planar images) and its symmetries
         (e.g. rotations or reflections).
         As an `Euclidean` base space is assumed, a G-space is fully specified by the ``dimensionality`` of the space
         and a choice of origin-preserving symmetry group (``fibergroup``).
-        
+
         .. seealso::
-            
+
             :class:`~e2cnn.gspaces.FlipRot2dOnR2`,
             :class:`~e2cnn.gspaces.Rot2dOnR2`,
             :class:`~e2cnn.gspaces.Flip2dOnR2`,
             :class:`~e2cnn.gspaces.TrivialOnR2`
-        
+
         .. note ::
-        
+
             Mathematically, this class describes a *Principal Bundle*
             :math:`\pi : (\R^D, +) \rtimes G \to \mathbb{R}^D, tg \mapsto tG`,
             with the Euclidean space :math:`\mathbb{R}^D` (where :math:`D` is the ``dimensionality``) as `base space`
             and :math:`G` as `fiber group` (``fibergroup``).
             For more details on this interpretation we refer to
             `A General Theory of Equivariant CNNs On Homogeneous Spaces <https://papers.nips.cc/paper/9114-a-general-theory-of-equivariant-cnns-on-homogeneous-spaces.pdf>`_.
-        
-        
+
+
         Args:
             fibergroup (Group): the fiber group
             dimensionality (int): the dimensionality of the Euclidean space on which a signal is defined
             name (str): an identification name
-        
+
         Attributes:
             ~.fibergroup (Group): the fiber group
             ~.dimensionality (int): the dimensionality of the Euclidean space on which a signal is defined
             ~.name (str): an identification name
             ~.basespace (str): the name of the space whose symmetries are modeled. It is an Euclidean space :math:`\R^D`.
-        
+
         """
 
         self.name = name
@@ -60,7 +58,7 @@ class GSpace(ABC):
         self.basespace = f"R^{self.dimensionality}"
 
     @abstractmethod
-    def restrict(self, id) -> Tuple[GSpace, Callable, Callable]:
+    def restrict(self, id):
         r"""
 
         Build the :class:`~e2cnn.gspaces.GSpace` associated with the subgroup of the current fiber group identified by
@@ -85,9 +83,9 @@ class GSpace(ABC):
         """
         pass
 
-    def featurefield_action(self, input: np.ndarray, repr: e2cnn.group.Representation, element) -> np.ndarray:
+    def featurefield_action(self, input, repr, element):
         r"""
-        
+
         This method implements the action of the symmetry group on a feature field defined over the basespace of this
         G-space.
         It includes both an action over the basespace (e.g. a rotation of the points on the plane) and a transformation
@@ -126,15 +124,15 @@ class GSpace(ABC):
 
         """
         assert repr.group == self.fibergroup
-    
+
         rho = repr(element)
-    
+
         output = np.einsum("oi,bi...->bo...", rho, input)
-    
+
         return self._basespace_action(output, element)
 
     @abstractmethod
-    def _basespace_action(self, input: np.ndarray, element) -> np.ndarray:
+    def _basespace_action(self, input, element):
         r"""
 
         Defines how the fiber group transforms the base space.
@@ -164,10 +162,7 @@ class GSpace(ABC):
         pass
 
     @abstractmethod
-    def build_kernel_basis(self,
-                           in_repr: e2cnn.group.Representation,
-                           out_repr: e2cnn.group.Representation,
-                           **kwargs) -> e2cnn.kernels.KernelBasis:
+    def build_kernel_basis(self, in_repr, out_repr, **kwargs):
         r"""
 
         Builds a basis for the space of the equivariant kernels with respect to the symmetries described by this
@@ -177,9 +172,9 @@ class GSpace(ABC):
 
         .. math::
             \kappa(gx) = \rho_\text{out}(g) \kappa(x) \rho_\text{in}(g)^{-1}  \qquad \forall g \in G, x \in \R^D
-        
+
         where :math:`\rho_\text{in}` is ``in_repr`` while :math:`\rho_\text{out}` is ``out_repr``.
-        
+
         This method relies on the functionalities implemented in :mod:`e2cnn.kernels` and returns an instance of
         :class:`~e2cnn.kernels.KernelBasis`.
 
@@ -222,7 +217,7 @@ class GSpace(ABC):
         return self.fibergroup.representations
 
     @property
-    def trivial_repr(self) -> e2cnn.group.Representation:
+    def trivial_repr(self):
         r"""
         The trivial representation of the fiber group of this space.
 
@@ -233,7 +228,7 @@ class GSpace(ABC):
         """
         return self.fibergroup.trivial_representation
 
-    def irrep(self, *id) -> e2cnn.group.IrreducibleRepresentation:
+    def irrep(self, *id):
         r"""
         Builds the irreducible representation (:class:`~e2cnn.group.IrreducibleRepresentation`) of the fiber group
         identified by the input arguments.
@@ -252,7 +247,7 @@ class GSpace(ABC):
         return self.fibergroup.irrep(*id)
 
     @property
-    def regular_repr(self) -> e2cnn.group.Representation:
+    def regular_repr(self):
         r"""
         The regular representation of the fiber group of this space.
 
@@ -263,25 +258,25 @@ class GSpace(ABC):
         """
         return self.fibergroup.regular_representation
 
-    def quotient_repr(self, subgroup_id) -> e2cnn.group.Representation:
+    def quotient_repr(self, subgroup_id):
         r"""
         Builds the quotient representation of the fiber group of this space with respect to the subgroup identified
         by ``subgroup_id``.
-        
+
         Check the :meth:`~e2cnn.gspaces.GSpace.restrict` method's documentation in the non-abstract subclass used
         for a description of the parameter ``subgroup_id``.
 
         .. seealso::
-            
+
             See :attr:`e2cnn.group.Group.quotient_representation` for more details on the representation.
-        
+
         Args:
             subgroup_id: identifier of the subgroup
 
         """
         return self.fibergroup.quotient_representation(subgroup_id)
 
-    def induced_repr(self, subgroup_id, repr: e2cnn.group.Representation) -> e2cnn.group.Representation:
+    def induced_repr(self, subgroup_id, repr):
         r"""
         Builds the induced representation of the fiber group of this space from the representation ``repr`` of
         the subgroup identified by ``subgroup_id``.
@@ -290,9 +285,9 @@ class GSpace(ABC):
         for a description of the parameter ``subgroup_id``.
 
         .. seealso::
-            
+
             See :attr:`e2cnn.group.Group.induced_representation` for more details on the representation.
-        
+
         Args:
             subgroup_id: identifier of the subgroup
             repr (Representation): the representation of the subgroup to induce
@@ -303,5 +298,3 @@ class GSpace(ABC):
     @property
     def testing_elements(self):
         return self.fibergroup.testing_elements()
-
-

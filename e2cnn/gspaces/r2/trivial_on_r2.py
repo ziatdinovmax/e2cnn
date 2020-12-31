@@ -18,17 +18,16 @@ __all__ = ["TrivialOnR2"]
 
 
 class TrivialOnR2(GeneralOnR2):
-
-    def __init__(self, fibergroup: Group = None):
+    def __init__(self, fibergroup = None):
         r"""
 
         Describes the plane :math:`\R^2` without considering any origin-preserving symmetry.
         This is modeled by a choosing trivial fiber group :math:`\{e\}`.
-        
+
         .. note ::
             This models the symmetries of conventional *Convolutional Neural Networks* which are not equivariant to
             origin preserving transformations such as rotations and reflections.
-        
+
         Args:
             fibergroup (Group, optional): use an already existing instance of the symmetry group.
                                           By default, it builds a new instance of the trivial group.
@@ -43,16 +42,16 @@ class TrivialOnR2(GeneralOnR2):
 
         super(TrivialOnR2, self).__init__(fibergroup, name)
 
-    def restrict(self, id: int) -> Tuple[gspaces.GSpace, Callable, Callable]:
+    def restrict(self, id):
         r"""
 
         Build the :class:`~e2cnn.group.GSpace` associated with the subgroup of the current fiber group identified by
         the input ``id``.
-        
+
         As the trivial group contains only one element, there are no other subgroups.
         The only accepted input value is ``id=1`` and returns this same group.
         This functionality is implemented only for consistency with the other G-spaces.
-        
+
         Args:
             id (int): the order of the subgroup
 
@@ -70,13 +69,9 @@ class TrivialOnR2(GeneralOnR2):
         group, mapping, child = self.fibergroup.subgroup(id)
         return gspaces.TrivialOnR2(fibergroup=group), mapping, child
 
-    def _basis_generator(self,
-                         in_repr: Representation,
-                         out_repr: Representation,
-                         rings: List[float],
-                         sigma: List[float],
-                         **kwargs,
-                         ) -> kernels.KernelBasis:
+    def _basis_generator(
+        self, in_repr, out_repr, rings, sigma, **kwargs,
+    ):
         r"""
         Method that builds the analitical basis that spans the space of equivariant filters which
         are intertwiners between the representations induced from the representation ``in_repr`` and ``out_repr``.
@@ -98,27 +93,34 @@ class TrivialOnR2(GeneralOnR2):
             the basis built
 
         """
-    
+
         maximum_frequency = None
         maximum_offset = None
-    
-        if 'maximum_frequency' in kwargs and kwargs['maximum_frequency'] is not None:
-            maximum_frequency = kwargs['maximum_frequency']
-            assert isinstance(maximum_frequency, int) and maximum_frequency >= 0
-    
-        if 'maximum_offset' in kwargs and kwargs['maximum_offset'] is not None:
-            maximum_offset = kwargs['maximum_offset']
-            assert isinstance(maximum_offset, int) and maximum_offset >= 0
-    
-        assert (maximum_frequency is not None or maximum_offset is not None), \
-            'Error! Either the maximum frequency or the maximum offset for the frequencies must be set'
-    
-        return kernels.kernels_Trivial_act_R2(in_repr, out_repr, rings, sigma,
-                                              maximum_frequency,
-                                              max_offset=maximum_offset)
 
-    def _basespace_action(self, input: np.ndarray, element: Union[float, int]) -> np.ndarray:
-        
+        if "maximum_frequency" in kwargs and kwargs["maximum_frequency"] is not None:
+            maximum_frequency = kwargs["maximum_frequency"]
+            assert isinstance(maximum_frequency, int) and maximum_frequency >= 0
+
+        if "maximum_offset" in kwargs and kwargs["maximum_offset"] is not None:
+            maximum_offset = kwargs["maximum_offset"]
+            assert isinstance(maximum_offset, int) and maximum_offset >= 0
+
+        assert maximum_frequency is not None or maximum_offset is not None, (
+            "Error! Either the maximum frequency or the maximum offset for the"
+            " frequencies must be set"
+        )
+
+        return kernels.kernels_Trivial_act_R2(
+            in_repr,
+            out_repr,
+            rings,
+            sigma,
+            maximum_frequency,
+            max_offset=maximum_offset,
+        )
+
+    def _basespace_action(self, input, element):
+
         assert self.fibergroup.is_element(element)
         return input.copy()
 

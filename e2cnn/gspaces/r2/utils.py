@@ -1,4 +1,3 @@
-
 import numpy as np
 
 from scipy.ndimage import rotate
@@ -13,4 +12,3 @@ def rotate_array(x, angle):
         return np.rot90(x, k, axes=(-2, -1))
     else:
         return rotate(x, angle * 180.0 / np.pi, (-2, -1), reshape=False, order=2)
-

@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 from e2cnn import gspaces
@@ -23,8 +22,7 @@ __all__ = ["Rot2dOnR2"]
 
 
 class Rot2dOnR2(GeneralOnR2):
-
-    def __init__(self, N: int = None, maximum_frequency: int = None, fibergroup: Group = None):
+    def __init__(self, N = None, maximum_frequency = None, fibergroup = None):
         r"""
 
         Describes rotation symmetries of the plane :math:`\R^2`.
@@ -42,23 +40,32 @@ class Rot2dOnR2(GeneralOnR2):
                    In that case, the other parameters should not be provided.
 
         """
-        
-        assert N is not None or fibergroup is not None, "Error! Either use the parameter `N` or the parameter `group`!"
-    
+
+        assert (
+            N is not None or fibergroup is not None
+        ), "Error! Either use the parameter `N` or the parameter `group`!"
+
         if fibergroup is not None:
             assert isinstance(fibergroup, CyclicGroup) or isinstance(fibergroup, SO2)
-            assert maximum_frequency is None, "Maximum Frequency can't be set when the group is already provided in input"
+            assert maximum_frequency is None, (
+                "Maximum Frequency can't be set when the group is already provided in"
+                " input"
+            )
             N = fibergroup.order()
-            
+
         assert isinstance(N, int)
-        
+
         if N > 1:
-            assert maximum_frequency is None, "Maximum Frequency can't be set for finite cyclic groups"
-            name = '{}-Rotations'.format(N)
+            assert (
+                maximum_frequency is None
+            ), "Maximum Frequency can't be set for finite cyclic groups"
+            name = "{}-Rotations".format(N)
         elif N == -1:
-            name = 'Continuous-Rotations'
+            name = "Continuous-Rotations"
         else:
-            raise ValueError(f'Error! "N" has to be an integer greater than 1 or -1, but got {N}')
+            raise ValueError(
+                f'Error! "N" has to be an integer greater than 1 or -1, but got {N}'
+            )
 
         if fibergroup is None:
             if N > 1:
@@ -68,16 +75,16 @@ class Rot2dOnR2(GeneralOnR2):
 
         super(Rot2dOnR2, self).__init__(fibergroup, name)
 
-    def restrict(self, id: int) -> Tuple[gspaces.GSpace, Callable, Callable]:
+    def restrict(self, id):
         r"""
 
         Build the :class:`~e2cnn.group.GSpace` associated with the subgroup of the current fiber group identified by
         the input ``id``.
-        
+
         ``id`` is a positive integer :math:`M` indicating the number of rotations in the subgroup.
         If the current fiber group is :math:`C_N` (:class:`~e2cnn.group.CyclicGroup`), then :math:`M` needs to divide
         :math:`N`. Otherwise, :math:`M` can be any positive integer.
-        
+
         Args:
             id (int): the number :math:`M` of rotations in the subgroup
 
@@ -101,13 +108,9 @@ class Rot2dOnR2(GeneralOnR2):
         else:
             raise ValueError(f"id {id} not recognized!")
 
-    def _basis_generator(self,
-                         in_repr: Representation,
-                         out_repr: Representation,
-                         rings: List[float],
-                         sigma: List[float],
-                         **kwargs,
-                         ) -> kernels.KernelBasis:
+    def _basis_generator(
+        self, in_repr, out_repr, rings, sigma, **kwargs,
+    ):
         r"""
         Method that builds the analitical basis that spans the space of equivariant filters which
         are intertwiners between the representations induced from the representation ``in_repr`` and ``out_repr``.
@@ -129,41 +132,51 @@ class Rot2dOnR2(GeneralOnR2):
             the basis built
 
         """
-    
+
         if self.fibergroup.order() > 0:
             maximum_frequency = None
             maximum_offset = None
-    
-            if 'maximum_frequency' in kwargs and kwargs['maximum_frequency'] is not None:
-                maximum_frequency = kwargs['maximum_frequency']
+
+            if (
+                "maximum_frequency" in kwargs
+                and kwargs["maximum_frequency"] is not None
+            ):
+                maximum_frequency = kwargs["maximum_frequency"]
                 assert isinstance(maximum_frequency, int) and maximum_frequency >= 0
-    
-            if 'maximum_offset' in kwargs and kwargs['maximum_offset'] is not None:
-                maximum_offset = kwargs['maximum_offset']
+
+            if "maximum_offset" in kwargs and kwargs["maximum_offset"] is not None:
+                maximum_offset = kwargs["maximum_offset"]
                 assert isinstance(maximum_offset, int) and maximum_offset >= 0
-    
-            assert (maximum_frequency is not None or maximum_offset is not None), \
-                'Error! Either the maximum frequency or the maximum offset for the frequencies must be set'
-            
-            return kernels.kernels_CN_act_R2(in_repr, out_repr, rings, sigma,
-                                             maximum_frequency,
-                                             max_offset=maximum_offset)
+
+            assert maximum_frequency is not None or maximum_offset is not None, (
+                "Error! Either the maximum frequency or the maximum offset for the"
+                " frequencies must be set"
+            )
+
+            return kernels.kernels_CN_act_R2(
+                in_repr,
+                out_repr,
+                rings,
+                sigma,
+                maximum_frequency,
+                max_offset=maximum_offset,
+            )
         else:
             return kernels.kernels_SO2_act_R2(in_repr, out_repr, rings, sigma)
 
-    def _basespace_action(self, input: np.ndarray, element: Union[float, int]) -> np.ndarray:
-    
+    def _basespace_action(self, input, element):
+
         assert self.fibergroup.is_element(element)
-        
+
         if self.fibergroup.order() > 1:
             n = self.fibergroup.order()
-            
+
             rotation = element * 2.0 * np.pi / n
         else:
             rotation = element
-            
+
         output = rotate_array(input, rotation)
-            
+
         return output
 
     def __eq__(self, other):

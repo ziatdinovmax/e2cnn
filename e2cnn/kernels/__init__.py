@@ -1,4 +1,3 @@
-
 from .basis import EmptyBasisException, KernelBasis, GaussianRadialProfile, PolarBasis
 
 from .steerable_basis import SteerableKernelBasis
@@ -12,9 +11,9 @@ __all__ = [
     "EmptyBasisException",
     "KernelBasis",
     # General Bases
-    'GaussianRadialProfile',
-    'PolarBasis',
-    'SteerableKernelBasis',
+    "GaussianRadialProfile",
+    "PolarBasis",
+    "SteerableKernelBasis",
     # R2 bases
     "kernels_Flip_act_R2",
     "kernels_DN_act_R2",
@@ -22,7 +21,7 @@ __all__ = [
     "kernels_Trivial_act_R2",
     "kernels_CN_act_R2",
     "kernels_SO2_act_R2",
-    #utils
+    # utils
     "psi",
     "psichi",
     "chi",

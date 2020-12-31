@@ -93,5 +93,5 @@ __all__ = [
     "IdentityModule",
     "MaskModule",
     # subpackages
-    'r2_conv',
+    "r2_conv",
 ]

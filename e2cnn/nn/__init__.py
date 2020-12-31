@@ -1,4 +1,3 @@
-
 from .field_type import FieldType
 from .geometric_tensor import GeometricTensor, tensor_directsum
 

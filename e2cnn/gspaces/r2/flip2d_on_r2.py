@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 from e2cnn import gspaces
@@ -21,40 +20,37 @@ __all__ = ["Flip2dOnR2"]
 
 
 class Flip2dOnR2(GeneralOnR2):
-    
-    def __init__(self,
-                 axis: float = np.pi/2,
-                 fibergroup: Group = None):
+    def __init__(self, axis = np.pi / 2, fibergroup = None):
         r"""
-        
+
         Describes reflectional symmetries of the plane :math:`\R^2`.
-        
+
         Reflections are applied along the line through the origin with an angle ``axis`` degrees with respect to
         the *X*-axis.
-        
-        
+
+
         Args:
             axis (float, optional): the slope of the axis of the reflection (in radians).
                                     By default, the vertical axis is used (:math:`\pi/2`).
             fibergroup (Group, optional): use an already existing instance of the symmetry group
-        
+
         Attributes:
             ~.axis (float):  Angle with respect to the horizontal axis which defines the reflection axis.
-            
+
         """
-        
+
         self.axis = axis
-        
+
         if fibergroup is None:
             fibergroup = cyclic_group(2)
         else:
             assert isinstance(fibergroup, CyclicGroup) and fibergroup.order() == 2
-        
-        name = 'Flips'
-        
+
+        name = "Flips"
+
         super(Flip2dOnR2, self).__init__(fibergroup, name)
 
-    def restrict(self, id: int) -> Tuple[gspaces.GSpace, Callable, Callable]:
+    def restrict(self, id):
         r"""
 
         Build the :class:`~e2cnn.gspaces.GSpace` associated with the subgroup of the current fiber group identified
@@ -82,14 +78,10 @@ class Flip2dOnR2(GeneralOnR2):
             return gspaces.TrivialOnR2(fibergroup=group), mapping, child
         else:
             return gspaces.Flip2dOnR2(axis=self.axis, fibergroup=group), mapping, child
-    
-    def _basis_generator(self,
-                         in_repr: Representation,
-                         out_repr: Representation,
-                         rings: List[float],
-                         sigma: List[float],
-                         **kwargs,
-                         ) -> kernels.KernelBasis:
+
+    def _basis_generator(
+        self, in_repr, out_repr, rings, sigma, **kwargs,
+    ):
         r"""
         Method that builds the analitical basis that spans the space of equivariant filters which
         are intertwiners between the representations induced from the representation ``in_repr`` and ``out_repr``.
@@ -111,38 +103,45 @@ class Flip2dOnR2(GeneralOnR2):
             the basis built
 
         """
-    
+
         maximum_frequency = None
         maximum_offset = None
-    
-        if 'maximum_frequency' in kwargs and kwargs['maximum_frequency'] is not None:
-            maximum_frequency = kwargs['maximum_frequency']
-            assert isinstance(maximum_frequency, int) and maximum_frequency >= 0
-    
-        if 'maximum_offset' in kwargs and kwargs['maximum_offset'] is not None:
-            maximum_offset = kwargs['maximum_offset']
-            assert isinstance(maximum_offset, int) and maximum_offset >= 0
-    
-        assert (maximum_frequency is not None or maximum_offset is not None), \
-            'Error! Either the maximum frequency or the maximum offset for the frequencies must be set'
-    
-        return kernels.kernels_Flip_act_R2(in_repr, out_repr, rings, sigma,
-                                           axis=self.axis,
-                                           max_frequency=maximum_frequency,
-                                           max_offset=maximum_offset)
 
-    def _basespace_action(self, input: np.ndarray, element: int) -> np.ndarray:
-    
+        if "maximum_frequency" in kwargs and kwargs["maximum_frequency"] is not None:
+            maximum_frequency = kwargs["maximum_frequency"]
+            assert isinstance(maximum_frequency, int) and maximum_frequency >= 0
+
+        if "maximum_offset" in kwargs and kwargs["maximum_offset"] is not None:
+            maximum_offset = kwargs["maximum_offset"]
+            assert isinstance(maximum_offset, int) and maximum_offset >= 0
+
+        assert maximum_frequency is not None or maximum_offset is not None, (
+            "Error! Either the maximum frequency or the maximum offset for the"
+            " frequencies must be set"
+        )
+
+        return kernels.kernels_Flip_act_R2(
+            in_repr,
+            out_repr,
+            rings,
+            sigma,
+            axis=self.axis,
+            max_frequency=maximum_frequency,
+            max_offset=maximum_offset,
+        )
+
+    def _basespace_action(self, input, element):
+
         assert self.fibergroup.is_element(element)
-        
+
         output = input.copy()
-    
+
         if element:
             output = output[..., ::-1, :]
-        
+
             if self.axis != 0:
-                output = rotate_array(output, 2*self.axis)
-            
+                output = rotate_array(output, 2 * self.axis)
+
         return output
 
     def __eq__(self, other):

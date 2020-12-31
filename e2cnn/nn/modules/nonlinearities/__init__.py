@@ -1,4 +1,3 @@
-
 from .norm import NormNonLinearity
 from .induced_norm import InducedNormNonLinearity
 from .pointwise import PointwiseNonLinearity
@@ -24,5 +23,3 @@ __all__ = [
     "ReLU",
     "ELU",
 ]
-
-

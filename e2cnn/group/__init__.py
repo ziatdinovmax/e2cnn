@@ -1,4 +1,3 @@
-
 from .utils import psi, chi, psichi
 
 from .group import Group
@@ -38,4 +37,3 @@ __all__ = [
     "chi",
     "psichi",
 ]
-
