@@ -1,4 +1,3 @@
-
 from .r2convolution import R2Conv
 from .r2_transposed_convolution import R2ConvTransposed
 
@@ -12,4 +11,3 @@ __all__ = [
     "BasisExpansion",
     "BlocksBasisExpansion",
 ]
-
